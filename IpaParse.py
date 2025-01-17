@@ -11,6 +11,7 @@ import tempfile
 import zipfile
 
 from biplist import readPlist
+# from .biplist import readPlist
 
 class IpaParse(object):
     '''
@@ -38,7 +39,20 @@ class IpaParse(object):
         '''
         self.ipa_file_path = ipa_file_path
         
-    
+    def saveBinDataToFile(self, binaryData, fileToSave):
+        """save binary data into file"""
+        saveOK = False
+        try:
+            # open a file, if not exist, create it
+            savedBinFile = open(fileToSave, "wb")
+            #print "savedBinFile=",savedBinFile
+            savedBinFile.write(binaryData)
+            savedBinFile.close()
+            saveOK = True
+        except :
+            saveOK = False
+        return saveOK
+
     def _get_plist_temp_file(self):
         self.plist_temp_file = ''
         
@@ -46,12 +60,23 @@ class IpaParse(object):
         zip_name_list = zfile.namelist()
         for name in zip_name_list:
             if ".app/Info.plist" in name:
-                print name                    
-                tup = tempfile.mkstemp(suffix = '.plist')
-                fd = os.fdopen(tup[0], "w")
-                fd.write(zfile.read(name))
-                fd.close()
-                self.plist_temp_file = tup[1]
+                print("name=%s" % name)
+
+                fileContent = zfile.read(name)
+                print("type(fileContent)=%s" % type(fileContent))
+
+                # tup = tempfile.mkstemp(suffix = '.plist')
+                # fd = os.fdopen(tup[0], "w")
+                tmpFdNum, tmpFilename = tempfile.mkstemp(suffix = '.plist')
+                print("tmpFdNum=%s, tmpFilename=%s" % (tmpFdNum, tmpFilename))
+                # fd = os.fdopen(tmpFdNum, "w")
+                # fd.write(fileContent)
+                # fd.close()
+
+                self.saveBinDataToFile(fileContent, tmpFilename)
+
+                # self.plist_temp_file = tup[1]
+                self.plist_temp_file = tmpFilename
         zfile.close()
         
         return self.plist_temp_file
@@ -68,8 +93,8 @@ class IpaParse(object):
             self.plist_info_list = readPlist(self.plist_temp_file)
             os.remove(self.plist_temp_file)
             return self.plist_info_list
-        except Exception, e:
-            print "Not a plist:", e
+        except Exception as e:
+            print("Not a plist: %s" % e)
             self.plist_info_list = {}
             return False
     
@@ -98,13 +123,13 @@ class IpaParse(object):
     def target_os_version(self):
         self._check()
         if 'DTPlatformVersion' in self.plist_info_list:
-            return re.findall('[\d\.]*', self.plist_info_list['DTPlatformVersion'])[0]
+            return re.findall(r'[\d\.]*', self.plist_info_list['DTPlatformVersion'])[0]
         return ''
     
     def minimum_os_version(self):
         self._check()
         if 'MinimumOSVersion' in self.plist_info_list:
-            return re.findall('[\d\.]*', self.plist_info_list['MinimumOSVersion'])[0]
+            return re.findall(r'[\d\.]*', self.plist_info_list['MinimumOSVersion'])[0]
         return ''
         
     def version(self):
@@ -157,13 +182,15 @@ class IpaParse(object):
         return False
     
 if __name__ == '__main__':
-    parse = IpaParse(u'C:\\Users\\hzwangzhiwei\\Desktop\\H28_150514121833_resign.ipa')
-    
-    print json.dumps(parse.all_info(), default = lambda o: o.__dict__)
-    print parse.app_name()
-    print parse.bundle_identifier()
-    print parse.target_os_version()
-    print parse.minimum_os_version()
-    print parse.icon_file_name()
-    print parse.icon_file_path()
-    print parse.mv_icon_to('test.png')
+    # testIpadFullPath = u'C:\\Users\\hzwangzhiwei\\Desktop\\H28_150514121833_resign.ipa'
+    testIpadFullPath = "/xxx/yyy.ipa"
+    parse = IpaParse(testIpadFullPath)
+
+    print(json.dumps(parse.all_info(), default = lambda o: o.__dict__))
+    print("app_name=%s" % parse.app_name())
+    print("bundle_identifier=%s" % parse.bundle_identifier())
+    print("target_os_version=%s" % parse.target_os_version())
+    print("minimum_os_version=%s" % parse.minimum_os_version())
+    print("icon_file_name=%s" % parse.icon_file_name())
+    print("icon_file_path=%s" % parse.icon_file_path())
+    print("mv_icon_to=%s" % parse.mv_icon_to('test.png'))

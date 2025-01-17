@@ -124,8 +124,10 @@ def wrapDataObject(o, for_binary=False):
     if isinstance(o, Data) and not for_binary:
         v = sys.version_info
         if not (v[0] >= 3 and v[1] >= 4):
-            o = plistlib.Data(o)
-    elif isinstance(o, (bytes, plistlib.Data)) and for_binary:
+            # o = plistlib.Data(o)
+            o = o
+    # elif isinstance(o, (bytes, plistlib.Data)) and for_binary:
+    elif isinstance(o, bytes) and for_binary:
         if hasattr(o, 'data'):
             o = Data(o.data)
     elif isinstance(o, tuple):
@@ -133,10 +135,12 @@ def wrapDataObject(o, for_binary=False):
         o = tuple(o)
     elif isinstance(o, list):
         for i in range(len(o)):
-            o[i] = wrapDataObject(o[i], for_binary)
+            curVal = o[i]
+            o[i] = wrapDataObject(curVal, for_binary)
     elif isinstance(o, dict):
         for k in o:
-            o[k] = wrapDataObject(o[k], for_binary)
+            curVal = o[k]
+            o[k] = wrapDataObject(curVal, for_binary)
     return o
 
 def writePlist(rootObject, pathOrFile, binary=True):
