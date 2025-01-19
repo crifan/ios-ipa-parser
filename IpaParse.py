@@ -60,15 +60,15 @@ class IpaParse(object):
         zip_name_list = zfile.namelist()
         for name in zip_name_list:
             if ".app/Info.plist" in name:
-                print("name=%s" % name)
+                # print("name=%s" % name)
 
                 fileContent = zfile.read(name)
-                print("type(fileContent)=%s" % type(fileContent))
+                # print("type(fileContent)=%s" % type(fileContent))
 
                 # tup = tempfile.mkstemp(suffix = '.plist')
                 # fd = os.fdopen(tup[0], "w")
                 tmpFdNum, tmpFilename = tempfile.mkstemp(suffix = '.plist')
-                print("tmpFdNum=%s, tmpFilename=%s" % (tmpFdNum, tmpFilename))
+                # print("tmpFdNum=%s, tmpFilename=%s" % (tmpFdNum, tmpFilename))
                 # fd = os.fdopen(tmpFdNum, "w")
                 # fd.write(fileContent)
                 # fd.close()
@@ -183,14 +183,17 @@ class IpaParse(object):
     
 if __name__ == '__main__':
     # testIpadFullPath = u'C:\\Users\\hzwangzhiwei\\Desktop\\H28_150514121833_resign.ipa'
-    testIpadFullPath = "/xxx/yyy.ipa"
+    testIpadFullPath = "/xxx/WhatsApp_v23.25.85.ipa"
+    print("testIpadFullPath=%s" % testIpadFullPath)
     parse = IpaParse(testIpadFullPath)
 
-    print(json.dumps(parse.all_info(), default = lambda o: o.__dict__))
+    ipaAllInfo = parse.all_info()
+    print("ipaAllInfo=%s" % ipaAllInfo)
+    # print(json.dumps(ipaAllInfo, default = lambda o: o.__dict__))
     print("app_name=%s" % parse.app_name())
     print("bundle_identifier=%s" % parse.bundle_identifier())
     print("target_os_version=%s" % parse.target_os_version())
     print("minimum_os_version=%s" % parse.minimum_os_version())
     print("icon_file_name=%s" % parse.icon_file_name())
     print("icon_file_path=%s" % parse.icon_file_path())
-    print("mv_icon_to=%s" % parse.mv_icon_to('test.png'))
+    # print("mv_icon_to=%s" % parse.mv_icon_to('test.png'))
